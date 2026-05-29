@@ -1,0 +1,889 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+<title>WikiPedia - Ensiklopedia Bebas</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<style type="text/css">
+/* Styling Era 90-an untuk IE4 */
+body {
+    background-color: #E6E6FA;
+    font-family: "Times New Roman", Times, serif;
+    font-size: 14px;
+    color: #000000;
+    margin: 10px;
+    line-height: 1.5;
+}
+
+/* Table-based layout untuk IE4 */
+.header-table {
+    width: 100%;
+    background-color: #D3D3D3;
+    border: 2px solid #000080;
+    border-collapse: collapse;
+}
+
+.main-table {
+    width: 100%;
+    border: 1px solid #808080;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+.sidebar-cell {
+    width: 200px;
+    background-color: #F0F8FF;
+    border-right: 1px solid #808080;
+    vertical-align: top;
+    padding: 10px;
+}
+
+.content-cell {
+    background-color: #FFFFFF;
+    vertical-align: top;
+    padding: 15px;
+}
+
+/* Link styles */
+a:link {
+    color: #0000FF;
+    text-decoration: underline;
+}
+
+a:visited {
+    color: #800080;
+    text-decoration: underline;
+}
+
+a:hover {
+    color: #FF0000;
+    text-decoration: underline;
+}
+
+/* Form styles */
+input, textarea, select {
+    font-family: "Courier New", Courier, monospace;
+    font-size: 12px;
+    border: 1px solid #808080;
+    background-color: #FFFFFF;
+}
+
+input[type="submit"], input[type="button"] {
+    background-color: #D3D3D3;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* Header */
+.logo {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 28px;
+    font-weight: bold;
+    color: #000000;
+    letter-spacing: 2px;
+}
+
+.logo-sub {
+    font-size: 12px;
+    font-style: italic;
+    color: #808080;
+}
+
+/* Navigation */
+.nav-bar {
+    background-color: #D3D3D3;
+    border-top: 1px solid #808080;
+    border-bottom: 1px solid #808080;
+    padding: 5px;
+}
+
+/* Content boxes */
+.content-box {
+    border: 1px solid #808080;
+    background-color: #F5F5F5;
+    padding: 10px;
+    margin-bottom: 15px;
+}
+
+.content-title {
+    background-color: #D3D3D3;
+    border-bottom: 1px solid #808080;
+    font-weight: bold;
+    padding: 5px;
+    margin: -10px -10px 10px -10px;
+}
+
+/* Article styles */
+.article-title {
+    font-size: 24px;
+    color: #000080;
+    border-bottom: 2px solid #000080;
+    padding-bottom: 5px;
+    margin-bottom: 15px;
+}
+
+.article-meta {
+    font-size: 11px;
+    color: #808080;
+    border-top: 1px dotted #808080;
+    padding-top: 5px;
+    margin-top: 20px;
+}
+
+/* Status messages */
+.status-ok {
+    color: #008000;
+    font-weight: bold;
+}
+
+.status-error {
+    color: #FF0000;
+    font-weight: bold;
+}
+
+/* Compatibility fixes for IE4 */
+img {
+    border: 0;
+}
+
+table {
+    font-size: 14px;
+}
+
+/* Simple animations - GIF era 90an */
+.blink {
+    text-decoration: blink;
+}
+
+.marquee-text {
+    color: #FF0000;
+    font-weight: bold;
+}
+</style>
+
+<!-- IE4 Compatibility Script -->
+<script language="JavaScript" type="text/javascript">
+<!--
+// Global variables
+var currentUser = null;
+var articles = [];
+var users = [];
+
+// Initialize application
+function initApp() {
+    // Load data from localStorage or create defaults
+    if (typeof(Storage) !== "undefined") {
+        var savedArticles = localStorage.getItem("wikiArticles");
+        var savedUsers = localStorage.getItem("wikiUsers");
+        var savedUser = localStorage.getItem("currentUser");
+        
+        if (savedArticles) {
+            articles = JSON.parse(savedArticles);
+        } else {
+            // Create default articles
+            articles = [
+                {
+                    id: 1,
+                    title: "Muhammad Ali",
+                    content: "<b>Muhammad Ali</b> (nama lahir <b>Cassius Marcellus Clay Jr.</b>; 17 Januari 1942 – 3 Juni 2016) adalah mantan petinju profesional asal Amerika Serikat.<br><br>Ia dikenal sebagai salah satu tokoh olahraga yang paling penting dan terkenal dari abad ke-20.",
+                    category: "Olahraga",
+                    author: "Admin",
+                    created: "2023-01-15",
+                    views: 1245
+                },
+                {
+                    id: 2,
+                    title: "Sejarah Indonesia",
+                    content: "<b>Sejarah Indonesia</b> meliputi suatu rentang waktu yang sangat panjang yang dimulai sejak zaman prasejarah berdasarkan penemuan 'Manusia Jawa' yang berusia 1,7 juta tahun yang lalu.<br><br>Indonesia memproklamasikan kemerdekaannya pada 17 Agustus 1945.",
+                    category: "Sejarah",
+                    author: "Admin",
+                    created: "2023-02-10",
+                    views: 987
+                }
+            ];
+            saveArticles();
+        }
+        
+        if (savedUsers) {
+            users = JSON.parse(savedUsers);
+        } else {
+            users = [
+                {username: "admin", password: "admin123"}
+            ];
+            saveUsers();
+        }
+        
+        if (savedUser) {
+            currentUser = JSON.parse(savedUser);
+        }
+    } else {
+        // Fallback for browsers without localStorage
+        alert("Browser Anda tidak mendukung penyimpanan data. Fitur akan terbatas.");
+    }
+    
+    // Load home page
+    loadPage("home");
+    updateUserDisplay();
+}
+
+// Save data
+function saveArticles() {
+    if (typeof(Storage) !== "undefined") {
+        localStorage.setItem("wikiArticles", JSON.stringify(articles));
+    }
+}
+
+function saveUsers() {
+    if (typeof(Storage) !== "undefined") {
+        localStorage.setItem("wikiUsers", JSON.stringify(users));
+    }
+}
+
+// Page loading
+function loadPage(page, param) {
+    var contentDiv = document.getElementById("contentArea");
+    
+    switch(page) {
+        case "home":
+            contentDiv.innerHTML = getHomePage();
+            break;
+        case "article":
+            contentDiv.innerHTML = getArticlePage(param);
+            break;
+        case "create":
+            contentDiv.innerHTML = getCreatePage();
+            break;
+        case "login":
+            contentDiv.innerHTML = getLoginPage();
+            break;
+        case "register":
+            contentDiv.innerHTML = getRegisterPage();
+            break;
+        case "contents":
+            contentDiv.innerHTML = getContentsPage();
+            break;
+        case "upload":
+            contentDiv.innerHTML = getUploadPage();
+            break;
+        default:
+            contentDiv.innerHTML = getHomePage();
+    }
+}
+
+// Get page HTML
+function getHomePage() {
+    var html = '';
+    html += '<div class="article-title">Selamat Datang di Wikipedia</div>';
+    html += '<div class="content-box">';
+    html += '<div class="content-title">Ensiklopedia Bebas</div>';
+    html += '<p><b>Wikipedia</b> adalah ensiklopedia daring yang dapat disunting oleh siapa saja.</p>';
+    html += '<p>Total artikel: <b>' + articles.length + '</b></p>';
+    html += '</div>';
+    
+    html += '<div class="content-box">';
+    html += '<div class="content-title">Artikel Terbaru</div>';
+    for (var i = 0; i < Math.min(articles.length, 5); i++) {
+        var article = articles[i];
+        html += '<p><b><a href="javascript:loadPage(\'article\', ' + article.id + ')">' + article.title + '</a></b><br>';
+        html += '<font size="1">Kategori: ' + article.category + ' | Dibuat: ' + article.created + '</font></p>';
+    }
+    html += '</div>';
+    
+    html += '<div class="content-box">';
+    html += '<div class="content-title">Cara Berkontribusi</div>';
+    html += '<ol>';
+    html += '<li><a href="javascript:loadPage(\'create\')">Tulis artikel manual</a></li>';
+    html += '<li><a href="javascript:loadPage(\'upload\')">Upload file artikel</a></li>';
+    html += '<li>Edit artikel yang sudah ada</li>';
+    html += '</ol>';
+    html += '</div>';
+    
+    return html;
+}
+
+function getArticlePage(id) {
+    var article = null;
+    for (var i = 0; i < articles.length; i++) {
+        if (articles[i].id == id) {
+            article = articles[i];
+            break;
+        }
+    }
+    
+    if (!article) {
+        return '<div class="status-error">Artikel tidak ditemukan.</div>';
+    }
+    
+    // Increase view count
+    article.views++;
+    saveArticles();
+    
+    var html = '';
+    html += '<div class="article-title">' + article.title + '</div>';
+    
+    // Article actions
+    if (currentUser) {
+        html += '<div align="right">';
+        if (currentUser.username == article.author) {
+            html += '<input type="button" value="Edit" onclick="editArticle(' + article.id + ')"> ';
+            html += '<input type="button" value="Hapus" onclick="deleteArticle(' + article.id + ')"> ';
+        }
+        html += '<input type="button" value="Simpan ke Folder" onclick="saveToFolder(' + article.id + ')">';
+        html += '</div><br>';
+    }
+    
+    html += article.content;
+    
+    html += '<div class="article-meta">';
+    html += 'Kategori: <b>' + article.category + '</b> | ';
+    html += 'Dibuat oleh: <b>' + article.author + '</b> | ';
+    html += 'Tanggal: ' + article.created + ' | ';
+    html += 'Dilihat: ' + article.views + ' kali';
+    html += '</div>';
+    
+    return html;
+}
+
+function getCreatePage() {
+    if (!currentUser) {
+        return '<div class="status-error">Anda harus login terlebih dahulu.</div>';
+    }
+    
+    var html = '';
+    html += '<div class="article-title">Buat Artikel Baru</div>';
+    html += '<form name="createForm" onSubmit="return createArticle()">';
+    html += '<table border="0" cellpadding="5">';
+    html += '<tr><td>Judul:</td><td><input type="text" name="title" size="40" maxlength="100"></td></tr>';
+    html += '<tr><td>Kategori:</td><td>';
+    html += '<select name="category">';
+    html += '<option value="Sejarah">Sejarah</option>';
+    html += '<option value="Olahraga">Olahraga</option>';
+    html += '<option value="Tokoh">Tokoh</option>';
+    html += '<option value="Teknologi">Teknologi</option>';
+    html += '<option value="Lainnya">Lainnya</option>';
+    html += '</select>';
+    html += '</td></tr>';
+    html += '<tr><td valign="top">Isi:</td><td><textarea name="content" rows="15" cols="60"></textarea></td></tr>';
+    html += '<tr><td>Mode:</td><td>';
+    html += '<input type="radio" name="mode" value="manual" checked> Manual Edit ';
+    html += '<input type="radio" name="mode" value="upload"> Upload File';
+    html += '</td></tr>';
+    html += '<tr><td></td><td>';
+    html += '<input type="submit" value="Simpan Artikel"> ';
+    html += '<input type="button" value="Batal" onclick="loadPage(\'home\')">';
+    html += '</td></tr>';
+    html += '</table>';
+    html += '</form>';
+    
+    return html;
+}
+
+function getUploadPage() {
+    if (!currentUser) {
+        return '<div class="status-error">Anda harus login terlebih dahulu.</div>';
+    }
+    
+    var html = '';
+    html += '<div class="article-title">Upload File Artikel</div>';
+    html += '<div class="content-box">';
+    html += '<div class="content-title">Mode Upload</div>';
+    html += '<p>Upload file artikel yang sudah Anda buat:</p>';
+    html += '<ul>';
+    html += '<li>File teks (.txt)</li>';
+    html += '<li>File dengan format sederhana</li>';
+    html += '<li>Maksimal 5KB</li>';
+    html += '</ul>';
+    html += '</div>';
+    
+    html += '<form name="uploadForm" onSubmit="return uploadArticle()">';
+    html += '<table border="0" cellpadding="5">';
+    html += '<tr><td>Judul:</td><td><input type="text" name="title" size="40"></td></tr>';
+    html += '<tr><td>Kategori:</td><td>';
+    html += '<select name="category">';
+    html += '<option value="Sejarah">Sejarah</option>';
+    html += '<option value="Olahraga">Olahraga</option>';
+    html += '<option value="Tokoh">Tokoh</option>';
+    html += '</select>';
+    html += '</td></tr>';
+    html += '<tr><td>File:</td><td>';
+    html += '<input type="file" name="fileInput">';
+    html += '</td></tr>';
+    html += '<tr><td></td><td>';
+    html += '<input type="submit" value="Upload Artikel"> ';
+    html += '<input type="button" value="Batal" onclick="loadPage(\'home\')">';
+    html += '</td></tr>';
+    html += '</table>';
+    html += '</form>';
+    
+    return html;
+}
+
+function getLoginPage() {
+    var html = '';
+    html += '<div class="article-title">Login ke Wikipedia</div>';
+    html += '<form name="loginForm" onSubmit="return doLogin()">';
+    html += '<table border="0" cellpadding="10" align="center">';
+    html += '<tr><td>Username:</td><td><input type="text" name="username"></td></tr>';
+    html += '<tr><td>Password:</td><td><input type="password" name="password"></td></tr>';
+    html += '<tr><td colspan="2" align="center">';
+    html += '<input type="submit" value="Login"> ';
+    html += '<input type="button" value="Buat Akun" onclick="loadPage(\'register\')">';
+    html += '</td></tr>';
+    html += '</table>';
+    html += '</form>';
+    
+    return html;
+}
+
+function getRegisterPage() {
+    var html = '';
+    html += '<div class="article-title">Buat Akun Baru</div>';
+    html += '<form name="registerForm" onSubmit="return doRegister()">';
+    html += '<table border="0" cellpadding="10" align="center">';
+    html += '<tr><td>Username:</td><td><input type="text" name="username"></td></tr>';
+    html += '<tr><td>Password:</td><td><input type="password" name="password"></td></tr>';
+    html += '<tr><td>Konfirmasi:</td><td><input type="password" name="confirm"></td></tr>';
+    html += '<tr><td colspan="2" align="center">';
+    html += '<input type="submit" value="Daftar"> ';
+    html += '<input type="button" value="Kembali" onclick="loadPage(\'login\')">';
+    html += '</td></tr>';
+    html += '</table>';
+    html += '</form>';
+    
+    return html;
+}
+
+function getContentsPage() {
+    var html = '';
+    html += '<div class="article-title">Daftar Isi</div>';
+    html += '<p>Total artikel: <b>' + articles.length + '</b></p>';
+    
+    // Group by category
+    var categories = {};
+    for (var i = 0; i < articles.length; i++) {
+        var cat = articles[i].category;
+        if (!categories[cat]) {
+            categories[cat] = [];
+        }
+        categories[cat].push(articles[i]);
+    }
+    
+    for (var cat in categories) {
+        html += '<div class="content-box">';
+        html += '<div class="content-title">' + cat + ' (' + categories[cat].length + ' artikel)</div>';
+        for (var j = 0; j < categories[cat].length; j++) {
+            var article = categories[cat][j];
+            html += '<p><b><a href="javascript:loadPage(\'article\', ' + article.id + ')">' + article.title + '</a></b><br>';
+            html += '<font size="1">oleh ' + article.author + ' | ' + article.created + '</font></p>';
+        }
+        html += '</div>';
+    }
+    
+    return html;
+}
+
+// User functions
+function updateUserDisplay() {
+    var userDiv = document.getElementById("userInfo");
+    var navDiv = document.getElementById("navLinks");
+    
+    if (currentUser) {
+        userDiv.innerHTML = 'Halo, <b>' + currentUser.username + '</b> | ';
+        userDiv.innerHTML += '<a href="javascript:logout()">Logout</a>';
+        
+        navDiv.innerHTML += ' | <a href="javascript:loadPage(\'create\')">Buat Artikel</a>';
+        navDiv.innerHTML += ' | <a href="javascript:loadPage(\'upload\')">Upload File</a>';
+    } else {
+        userDiv.innerHTML = '<a href="javascript:loadPage(\'login\')">Login</a> | ';
+        userDiv.innerHTML += '<a href="javascript:loadPage(\'register\')">Buat Akun</a>';
+    }
+}
+
+function doLogin() {
+    var username = document.forms["loginForm"]["username"].value;
+    var password = document.forms["loginForm"]["password"].value;
+    
+    // Simple validation
+    if (!username || !password) {
+        alert("Username dan password harus diisi!");
+        return false;
+    }
+    
+    // Find user
+    for (var i = 0; i < users.length; i++) {
+        if (users[i].username == username && users[i].password == password) {
+            currentUser = {username: username};
+            if (typeof(Storage) !== "undefined") {
+                localStorage.setItem("currentUser", JSON.stringify(currentUser));
+            }
+            updateUserDisplay();
+            loadPage("home");
+            return false;
+        }
+    }
+    
+    alert("Username atau password salah!");
+    return false;
+}
+
+function doRegister() {
+    var username = document.forms["registerForm"]["username"].value;
+    var password = document.forms["registerForm"]["password"].value;
+    var confirm = document.forms["registerForm"]["confirm"].value;
+    
+    // Validation
+    if (!username || !password) {
+        alert("Semua field harus diisi!");
+        return false;
+    }
+    
+    if (password != confirm) {
+        alert("Password tidak cocok!");
+        return false;
+    }
+    
+    // Check if user exists
+    for (var i = 0; i < users.length; i++) {
+        if (users[i].username == username) {
+            alert("Username sudah digunakan!");
+            return false;
+        }
+    }
+    
+    // Add new user
+    users.push({username: username, password: password});
+    saveUsers();
+    
+    currentUser = {username: username};
+    if (typeof(Storage) !== "undefined") {
+        localStorage.setItem("currentUser", JSON.stringify(currentUser));
+    }
+    
+    updateUserDisplay();
+    loadPage("home");
+    return false;
+}
+
+function logout() {
+    currentUser = null;
+    if (typeof(Storage) !== "undefined") {
+        localStorage.removeItem("currentUser");
+    }
+    updateUserDisplay();
+    loadPage("home");
+}
+
+// Article functions
+function createArticle() {
+    var title = document.forms["createForm"]["title"].value;
+    var category = document.forms["createForm"]["category"].value;
+    var content = document.forms["createForm"]["content"].value;
+    var mode = document.forms["createForm"]["mode"].value;
+    
+    if (!title || !content) {
+        alert("Judul dan isi artikel harus diisi!");
+        return false;
+    }
+    
+    // Create new article
+    var newId = articles.length > 0 ? articles[articles.length-1].id + 1 : 1;
+    var newArticle = {
+        id: newId,
+        title: title,
+        content: content,
+        category: category,
+        author: currentUser.username,
+        created: getCurrentDate(),
+        views: 0,
+        mode: mode
+    };
+    
+    articles.push(newArticle);
+    saveArticles();
+    
+    alert("Artikel '" + title + "' berhasil dibuat!");
+    loadPage("article", newId);
+    return false;
+}
+
+function editArticle(id) {
+    alert("Fitur edit akan segera tersedia!");
+}
+
+function deleteArticle(id) {
+    if (!confirm("Apakah Anda yakin ingin menghapus artikel ini?")) {
+        return;
+    }
+    
+    for (var i = 0; i < articles.length; i++) {
+        if (articles[i].id == id) {
+            articles.splice(i, 1);
+            saveArticles();
+            alert("Artikel berhasil dihapus!");
+            loadPage("home");
+            return;
+        }
+    }
+}
+
+function uploadArticle() {
+    // For IE4, file upload is limited
+    var title = document.forms["uploadForm"]["title"].value;
+    var category = document.forms["uploadForm"]["category"].value;
+    
+    if (!title) {
+        alert("Judul harus diisi!");
+        return false;
+    }
+    
+    // Simulate file upload
+    var content = "Artikel ini diupload melalui mode file upload.\n\n";
+    content += "File akan diproses secara otomatis oleh sistem.";
+    
+    var newId = articles.length > 0 ? articles[articles.length-1].id + 1 : 1;
+    var newArticle = {
+        id: newId,
+        title: title,
+        content: content.replace(/\n/g, "<br>"),
+        category: category,
+        author: currentUser.username,
+        created: getCurrentDate(),
+        views: 0,
+        mode: "upload",
+        filename: "uploaded_file.txt"
+    };
+    
+    articles.push(newArticle);
+    saveArticles();
+    
+    alert("File berhasil diupload dan artikel '" + title + "' dibuat!");
+    loadPage("article", newId);
+    return false;
+}
+
+function saveToFolder(id) {
+    // Simulate saving to folder
+    alert("Artikel berhasil disimpan ke folder!");
+}
+
+// Utility functions
+function getCurrentDate() {
+    var today = new Date();
+    var dd = String(today.getDate()).padStart(2, '0');
+    var mm = String(today.getMonth() + 1).padStart(2, '0');
+    var yyyy = today.getFullYear();
+    return yyyy + '-' + mm + '-' + dd;
+}
+
+function searchArticles() {
+    var query = document.getElementById("searchInput").value;
+    if (!query) {
+        return;
+    }
+    
+    var results = [];
+    for (var i = 0; i < articles.length; i++) {
+        if (articles[i].title.toLowerCase().indexOf(query.toLowerCase()) !== -1 ||
+            articles[i].content.toLowerCase().indexOf(query.toLowerCase()) !== -1) {
+            results.push(articles[i]);
+        }
+    }
+    
+    var contentDiv = document.getElementById("contentArea");
+    var html = '';
+    html += '<div class="article-title">Hasil Pencarian: "' + query + '"</div>';
+    html += '<p>Ditemukan ' + results.length + ' artikel</p>';
+    
+    if (results.length > 0) {
+        for (var j = 0; j < results.length; j++) {
+            html += '<div class="content-box">';
+            html += '<h3><a href="javascript:loadPage(\'article\', ' + results[j].id + ')">' + results[j].title + '</a></h3>';
+            html += '<p>' + results[j].content.substring(0, 100) + '...</p>';
+            html += '<font size="1">Kategori: ' + results[j].category + '</font>';
+            html += '</div>';
+        }
+    } else {
+        html += '<div class="content-box">Tidak ada artikel yang sesuai dengan pencarian Anda.</div>';
+    }
+    
+    contentDiv.innerHTML = html;
+}
+
+// Initialize on load
+window.onload = function() {
+    initApp();
+};
+
+// Fallback for very old browsers
+if (!document.getElementById) {
+    document.getElementById = function(id) {
+        return document.all ? document.all[id] : null;
+    };
+}
+
+// Marquee effect for old browsers
+function startMarquee() {
+    if (document.getElementById("marqueeText")) {
+        var marquee = document.getElementById("marqueeText");
+        var text = "Selamat datang di Wikipedia versi klasik! ";
+        marquee.innerHTML = text + text + text + text;
+    }
+}
+
+//-->
+</script>
+
+<!-- IE4 Compatibility Layer -->
+<!--[if IE 4]>
+<style type="text/css">
+/* IE4-specific fixes */
+body {
+    scrollbar-base-color: #D3D3D3;
+    scrollbar-face-color: #D3D3D3;
+    scrollbar-shadow-color: #808080;
+    scrollbar-highlight-color: #FFFFFF;
+    scrollbar-3dlight-color: #808080;
+    scrollbar-darkshadow-color: #000000;
+    scrollbar-track-color: #F0F0F0;
+    scrollbar-arrow-color: #000000;
+}
+
+input, textarea, select {
+    font: 12px "MS Sans Serif", Arial, sans-serif;
+}
+</style>
+<![endif]-->
+
+</head>
+<body onload="initApp(); startMarquee();">
+
+<!-- Header -->
+<table class="header-table" cellpadding="10" cellspacing="0">
+<tr>
+    <td width="60%">
+        <div class="logo">WIKIPEDIA</div>
+        <div class="logo-sub">Ensiklopedia Bebas</div>
+    </td>
+    <td width="40%" valign="middle" align="right">
+        <form onSubmit="searchArticles(); return false;">
+        <input type="text" id="searchInput" size="25">
+        <input type="button" value="Cari" onClick="searchArticles()">
+        </form>
+    </td>
+</tr>
+<tr>
+    <td colspan="2" class="nav-bar">
+        <a href="javascript:loadPage('home')">Halaman Utama</a> | 
+        <a href="javascript:loadPage('contents')">Daftar Isi</a> | 
+        <a href="javascript:void(0)">Artikel Acak</a> | 
+        <a href="javascript:void(0)">Tentang</a>
+        <span id="navLinks"></span>
+    </td>
+</tr>
+<tr>
+    <td colspan="2">
+        <div id="marqueeText" class="marquee-text">
+        <!-- Marquee will be populated by JavaScript -->
+        </div>
+    </td>
+</tr>
+<tr>
+    <td colspan="2" align="right">
+        <div id="userInfo"></div>
+    </td>
+</tr>
+</table>
+
+<!-- Main Content -->
+<table class="main-table" cellpadding="0" cellspacing="0">
+<tr>
+    <!-- Sidebar -->
+    <td class="sidebar-cell">
+        <div class="content-box">
+            <div class="content-title">Navigasi</div>
+            <ul>
+                <li><a href="javascript:loadPage('home')">Halaman Utama</a></li>
+                <li><a href="javascript:loadPage('contents')">Daftar Isi</a></li>
+                <li><a href="javascript:void(0)">Artikel Pilihan</a></li>
+                <li><a href="javascript:void(0)">Perubahan Terbaru</a></li>
+            </ul>
+        </div>
+        
+        <div class="content-box">
+            <div class="content-title">Kategori</div>
+            <ul>
+                <li><a href="javascript:void(0)">Sejarah</a></li>
+                <li><a href="javascript:void(0)">Olahraga</a></li>
+                <li><a href="javascript:void(0)">Tokoh</a></li>
+                <li><a href="javascript:void(0)">Teknologi</a></li>
+            </ul>
+        </div>
+        
+        <div class="content-box">
+            <div class="content-title">Wikipedia</div>
+            <p><font size="1">Wikipedia adalah ensiklopedia daring yang dapat disunting oleh siapa saja.</font></p>
+        </div>
+        
+        <div class="content-box">
+            <div class="content-title">Mode Artikel</div>
+            <p><font size="1">Dukung 2 mode:</font></p>
+            <ul>
+                <li><font size="1">Edit Manual</font></li>
+                <li><font size="1">Upload File</font></li>
+            </ul>
+        </div>
+    </td>
+    
+    <!-- Main Content Area -->
+    <td class="content-cell">
+        <div id="contentArea">
+            <!-- Content will be loaded here -->
+            Memuat...
+        </div>
+        
+        <br><hr><br>
+        
+        <!-- Footer -->
+        <div align="center">
+            <font size="1">
+            Wikipedia® adalah merek dagang dari Wikimedia Foundation, Inc.<br>
+            <a href="javascript:void(0)">Kebijakan Privasi</a> | 
+            <a href="javascript:void(0)">Tentang Wikipedia</a> | 
+            <a href="javascript:void(0)">Penyangkalan</a> | 
+            <a href="javascript:void(0)">Kontak</a><br>
+            Dibuat untuk kompatibilitas IE4.0 | Offline Mode | Tampilan Era 90-an
+            </font>
+        </div>
+        
+        <!-- Visitor Counter (Era 90an style) -->
+        <div align="center" style="margin-top: 20px;">
+            <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" width="88" height="31" border="0">
+            <br>
+            <font size="1">
+            Pengunjung ke: <b>12345</b><br>
+            Terakhir update: <script>document.write(getCurrentDate());</script>
+            </font>
+        </div>
+    </td>
+</tr>
+</table>
+
+<!-- Compatibility notice for very old browsers -->
+<noscript>
+<div align="center" style="border: 2px solid #FF0000; padding: 10px; margin: 10px;">
+<font color="#FF0000"><b>PERINGATAN:</b> JavaScript tidak diaktifkan. Beberapa fitur tidak akan berfungsi.</font>
+</div>
+</noscript>
+
+<!-- IE4 Detection -->
+<script language="JavaScript">
+<!--
+if (navigator.appVersion.indexOf("MSIE 4") != -1) {
+    document.write('<div align="center" style="border: 1px solid #0000FF; padding: 5px; margin: 5px;">');
+    document.write('<font size="1" color="#0000FF">Mode Internet Explorer 4.0 Terdeteksi</font>');
+    document.write('</div>');
+}
+//-->
+</script>
+
+</body>
+</html>
